@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/content.css">
+    <script src="/js/ajax.js"></script>
+    <script src="/js/zepto.min.js"></script>
+    <script>
+        (function () {
+            //获取设备宽度 （浏览器的宽度）
+            var width = document.documentElement.clientWidth;
+            //获取 根元素
+            var html = document.getElementsByTagName("html")[0];
+            // 设计稿是 750 宽度
+            // 把设计稿 除  100 = 7.5
+            // 设备宽度 除 7.5 得到 font-size。
+            var size = width / 6.4;
+            html.style.fontSize = size + 'px';
+        })();
+    </script>
+</head>
+<body>
+<div class="wra">
+    <ul>
+        <li class="item">
+            <p>二汪</p>
+            <img src="http://img.juhe.cn/joke/201412/19/13AF55EB201FADD4DB8AD3C0FC053E72.gif" alt="二汪" class="xh">
+            <span class="aTime">2016-10-18</span>
+        </li>
+    </ul>
+</div>
+</body>
+<script>
+    $(function () {
+        var ul = $(".wra>ul");
+        var page = 1;
+        var flage = true;
+        var loading=$("<li class='loading'/>");
+        loading.html('<span>正在加载...<img src="/images/index.gif" class="loading"></span>');
+        /* var date=new Date();
+         var time=date.getTime().toString().substring(0,10);*/
+        var body = $("body");
+        $(document).on("scroll", function (e) {
+            if (body.scrollTop() >= (body.height() - window.innerHeight)) {
+                console.log(page);
+                ajaxAdd();
+            }
+//             console.log($("body").scrollTop());
+        });
+        ajaxAdd();
+        function ajaxAdd() {
+            if (flage) {
+                page++;
+                flage = false;
+                ul.append(loading);
+                setTimeout(function () {
+                    $.get("/xhImg?page=" + page, function (data) {
+                        var res = JSON.parse(data);
+                        if (res.error_code == 0) {
+                            var html = ul.html();
+                            for (var i = 0; i < res.result.data.length; i++) {
+                                html += '<li class="item"><p>' + res.result.data[i].content +
+                                        '</p><img src="'+res.result.data[i].url +'" alt="'+  res.result.data[i].content +'" class="xh"><span class="aTime">' + res.result.data[i].updatetime +
+                                        '</span></li>'
+                            }
+                            ul.html(html);
+                            flage=true;
+                            ul.find(".loading").remove();
+                        }
+
+                    });
+                },1000);
+
+            }
+        }
+    });
+</script>
+</html>
